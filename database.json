@@ -1,0 +1,130 @@
+{
+  "2025-11-18_Chamada Matinal": [
+    {
+      "id": "cfo2_alfa",
+      "name": "Alfa",
+      "prev": 34,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 34
+    },
+    {
+      "id": "cfo2_bravo",
+      "name": "Bravo",
+      "prev": 33,
+      "ffna": 20,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 13
+    },
+    {
+      "id": "cfo2_charlie",
+      "name": "Charlie",
+      "prev": 34,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 34
+    },
+    {
+      "id": "cfo2_delta",
+      "name": "Delta",
+      "prev": 34,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 34
+    },
+    {
+      "id": "cfo2_echo",
+      "name": "Echo",
+      "prev": 35,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 35
+    },
+    {
+      "id": "cfo2_foxtrot",
+      "name": "Foxtrot",
+      "prev": 35,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 35
+    },
+    {
+      "id": "cfo1_alfa",
+      "name": "Alfa",
+      "prev": 32,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 32
+    },
+    {
+      "id": "cfo1_bravo",
+      "name": "Bravo",
+      "prev": 29,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 29
+    },
+    {
+      "id": "cfo1_charlie",
+      "name": "Charlie",
+      "prev": 29,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 29
+    },
+    {
+      "id": "cfo1_delta",
+      "name": "Delta",
+      "prev": 31,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 31
+    },
+    {
+      "id": "cfo1_echo",
+      "name": "Echo",
+      "prev": 27,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 27
+    },
+    {
+      "id": "cfo1_foxtrot",
+      "name": "Foxtrot",
+      "prev": 31,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 31
+    },
+    {
+      "id": "cho_alfa",
+      "name": "Alfa",
+      "prev": 34,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 34
+    },
+    {
+      "id": "cho_bravo",
+      "name": "Bravo",
+      "prev": 34,
+      "ffna": 0,
+      "ffda": 0,
+      "confirmed": false,
+      "pres": 34
+    }
+  ]
+}

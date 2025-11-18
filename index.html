@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel de Efetivo EFO/CHO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: #f8fafc;
+        padding-bottom: 160px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+
+      .input-cell {
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 700;
+        outline: none;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+      .input-cell:focus {
+        background-color: #fff;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.5);
+      }
+      .input-cell::placeholder {
+        color: #cbd5e1;
+        font-weight: 400;
+      }
+
+      .input-prev {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        font-weight: 500;
+        background: transparent;
+        border: 1px solid transparent;
+        color: #64748b;
+        border-radius: 4px;
+      }
+      .input-prev.unlocked {
+        background-color: #fff;
+        border: 1px solid #94a3b8;
+        color: #0f172a;
+        font-weight: 700;
+      }
+
+      .row-confirmed {
+        background-color: #dcfce7 !important;
+        border-left: 4px solid #16a34a;
+      }
+      .row-alert {
+        background-color: #fee2e2 !important;
+        border-left: 4px solid #dc2626;
+      }
+      .row-neutral {
+        background-color: white;
+        border-left: 4px solid transparent;
+      }
+
+      .section-disabled .card-content {
+        opacity: 0.3;
+        pointer-events: none;
+        filter: grayscale(100%);
+      }
+      .section-disabled [class*="card-header"] {
+        background-color: #e2e8f0;
+        color: #64748b;
+      }
+      .switch {
+        pointer-events: auto;
+      }
+      .transition-all-300 {
+        transition: all 0.3s ease-in-out;
+      }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 36px;
+        height: 20px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #cbd5e1;
+        transition: 0.4s;
+        border-radius: 34px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 2px;
+        bottom: 2px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: #3b82f6;
+      }
+      input:checked + .slider:before {
+        transform: translateX(16px);
+      }
+
+      .header-gradient {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      }
+      .card-header-cfo2 {
+        background: #eff6ff;
+        border-bottom: 1px solid #bfdbfe;
+        color: #1e40af;
+      }
+      .card-header-cfo1 {
+        background: #fefce8;
+        border-bottom: 1px solid #fde047;
+        color: #854d0e;
+      }
+      .card-header-cho {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        color: #334155;
+      }
+      .col-header {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header-gradient text-white p-3 shadow-lg sticky top-0 z-50">
+      <div class="max-w-3xl mx-auto">
+        <div class="flex justify-between items-center mb-2">
+          <div>
+            <h1 class="text-lg font-black tracking-wide leading-tight">
+              EFETIVO EFO
+            </h1>
+            <div class="flex items-center gap-2 text-[10px]">
+              <span
+                id="server-status"
+                class="bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded transition-colors duration-500"
+                >VPS Local</span
+              >
+              <span
+                id="save-indicator"
+                class="hidden text-emerald-400 flex items-center gap-1 font-bold"
+                >SALVO NO SERVER</span
+              >
+            </div>
+          </div>
+          <div class="flex items-center bg-slate-800 rounded-lg p-1 gap-1">
+            <button
+              id="btn-pre"
+              onclick="setPhase('pre')"
+              class="text-[10px] font-bold px-2 py-1 rounded bg-blue-600 text-white"
+            >
+              PRÉ-ANÚNCIO
+            </button>
+            <button
+              id="btn-anuncio"
+              onclick="setPhase('anuncio')"
+              class="text-[10px] font-bold px-2 py-1 rounded text-slate-400 hover:bg-slate-700"
+            >
+              ANÚNCIO
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2 mb-3">
+          <div
+            class="bg-amber-900/30 border border-amber-700/50 rounded p-1.5 text-center flex flex-col justify-center"
+          >
+            <span
+              class="text-[9px] text-amber-200/80 font-bold uppercase tracking-tighter"
+              >FF NA APM</span
+            >
+            <span
+              class="text-xl font-black text-amber-400 leading-none"
+              id="header-total-ffna"
+              >0</span
+            >
+          </div>
+          <div
+            class="bg-rose-900/30 border border-rose-700/50 rounded p-1.5 text-center flex flex-col justify-center"
+          >
+            <span
+              class="text-[9px] text-rose-200/80 font-bold uppercase tracking-tighter"
+              >FF DA APM</span
+            >
+            <span
+              class="text-xl font-black text-rose-400 leading-none"
+              id="header-total-ffda"
+              >0</span
+            >
+          </div>
+          <div
+            class="bg-emerald-900/30 border border-emerald-700/50 rounded p-1.5 text-center flex flex-col justify-center relative overflow-hidden"
+          >
+            <div class="absolute inset-0 bg-emerald-500/5"></div>
+            <span
+              class="text-[9px] text-emerald-200/80 font-bold uppercase tracking-tighter relative z-10"
+              >PRESENTE</span
+            >
+            <div
+              class="text-xl font-black text-emerald-400 leading-none relative z-10 flex items-baseline justify-center gap-1"
+            >
+              <span id="header-total-pres">0</span>
+              <span class="text-[10px] text-slate-400 font-medium"
+                >/ <span id="header-total-prev">0</span></span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <input
+            type="date"
+            id="currentDate"
+            class="bg-slate-800 text-white text-sm rounded border border-slate-600 p-2 outline-none font-bold w-1/3 focus:border-blue-500 transition-colors text-center"
+          />
+          <select
+            id="rollCallType"
+            class="bg-slate-800 text-white text-sm rounded border border-slate-600 p-2 outline-none font-bold w-2/3 focus:border-blue-500 transition-colors"
+          >
+            <option value="Chamada Matinal">Chamada Matinal</option>
+            <option value="Almoço">Almoço</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Liberação">Liberação</option>
+            <option value="Formatura">Formatura</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-3xl mx-auto p-3 space-y-4 mt-2">
+      <div
+        class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all-300"
+        id="section-cfo2"
+      >
+        <div class="card-header-cfo2 p-3 flex justify-between items-center">
+          <div class="flex flex-col">
+            <div class="flex items-center gap-2">
+              <span class="font-black text-lg">CFO 2</span
+              ><button
+                onclick="confirmAllInSection('cfo2')"
+                class="bg-white/60 text-blue-700 p-1 rounded shadow-sm"
+              >
+                <span class="text-[10px] font-bold">TODOS</span>
+              </button>
+            </div>
+            <div class="text-xs font-bold opacity-80 mt-0.5">
+              Parcial: <span id="header-partial-pres-cfo2">0</span> /
+              <span id="header-partial-prev-cfo2">0</span>
+            </div>
+          </div>
+          <label class="switch"
+            ><input
+              type="checkbox"
+              checked
+              onchange="toggleSection('cfo2')" /><span class="slider"></span
+          ></label>
+        </div>
+        <div class="card-content overflow-x-auto">
+          <table class="w-full text-center border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200">
+                <th class="p-2 text-left w-28 pl-4 text-slate-500 col-header">
+                  Turma
+                </th>
+                <th
+                  class="p-2 w-16 bg-blue-50/50 text-blue-800 col-header cursor-pointer"
+                  onclick="toggleEditPrev('cfo2')"
+                >
+                  PREV
+                </th>
+                <th
+                  class="p-2 w-16 bg-emerald-50/50 text-emerald-800 col-header"
+                >
+                  PRES
+                </th>
+                <th class="p-2 w-16 bg-amber-50/50 text-amber-800 col-header">
+                  NA APM
+                </th>
+                <th class="p-2 w-16 bg-rose-50/50 text-rose-800 col-header">
+                  DA APM
+                </th>
+              </tr>
+            </thead>
+            <tbody id="body-cfo2"></tbody>
+            <tfoot
+              class="bg-blue-50/30 font-bold text-slate-700 border-t border-slate-200"
+            >
+              <tr>
+                <td class="p-2 text-left pl-4 text-xs uppercase">Total</td>
+                <td id="total-prev-cfo2">0</td>
+                <td id="total-pres-cfo2">0</td>
+                <td id="total-ffna-cfo2">0</td>
+                <td id="total-ffda-cfo2">0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div
+        class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all-300"
+        id="section-cfo1"
+      >
+        <div class="card-header-cfo1 p-3 flex justify-between items-center">
+          <div class="flex flex-col">
+            <div class="flex items-center gap-2">
+              <span class="font-black text-lg">CFO 1</span
+              ><button
+                onclick="confirmAllInSection('cfo1')"
+                class="bg-white/60 text-yellow-800 p-1 rounded shadow-sm"
+              >
+                <span class="text-[10px] font-bold">TODOS</span>
+              </button>
+            </div>
+            <div class="text-xs font-bold opacity-80 mt-0.5">
+              Parcial: <span id="header-partial-pres-cfo1">0</span> /
+              <span id="header-partial-prev-cfo1">0</span>
+            </div>
+          </div>
+          <label class="switch"
+            ><input
+              type="checkbox"
+              checked
+              onchange="toggleSection('cfo1')" /><span class="slider"></span
+          ></label>
+        </div>
+        <div class="card-content overflow-x-auto">
+          <table class="w-full text-center border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200">
+                <th class="p-2 text-left w-28 pl-4 text-slate-500 col-header">
+                  Turma
+                </th>
+                <th
+                  class="p-2 w-16 bg-blue-50/50 text-blue-800 col-header cursor-pointer"
+                  onclick="toggleEditPrev('cfo1')"
+                >
+                  PREV
+                </th>
+                <th
+                  class="p-2 w-16 bg-emerald-50/50 text-emerald-800 col-header"
+                >
+                  PRES
+                </th>
+                <th class="p-2 w-16 bg-amber-50/50 text-amber-800 col-header">
+                  NA APM
+                </th>
+                <th class="p-2 w-16 bg-rose-50/50 text-rose-800 col-header">
+                  DA APM
+                </th>
+              </tr>
+            </thead>
+            <tbody id="body-cfo1"></tbody>
+            <tfoot
+              class="bg-yellow-50/30 font-bold text-slate-700 border-t border-slate-200"
+            >
+              <tr>
+                <td class="p-2 text-left pl-4 text-xs uppercase">Total</td>
+                <td id="total-prev-cfo1">0</td>
+                <td id="total-pres-cfo1">0</td>
+                <td id="total-ffna-cfo1">0</td>
+                <td id="total-ffda-cfo1">0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div
+        class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all-300"
+        id="section-cho"
+      >
+        <div class="card-header-cho p-3 flex justify-between items-center">
+          <div class="flex flex-col">
+            <div class="flex items-center gap-2">
+              <span class="font-black text-lg">CHO</span
+              ><button
+                onclick="confirmAllInSection('cho')"
+                class="bg-white/60 text-slate-700 p-1 rounded shadow-sm"
+              >
+                <span class="text-[10px] font-bold">TODOS</span>
+              </button>
+            </div>
+            <div class="text-xs font-bold opacity-80 mt-0.5">
+              Parcial: <span id="header-partial-pres-cho">0</span> /
+              <span id="header-partial-prev-cho">0</span>
+            </div>
+          </div>
+          <label class="switch"
+            ><input
+              type="checkbox"
+              checked
+              onchange="toggleSection('cho')" /><span class="slider"></span
+          ></label>
+        </div>
+        <div class="card-content overflow-x-auto">
+          <table class="w-full text-center border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200">
+                <th class="p-2 text-left w-28 pl-4 text-slate-500 col-header">
+                  Turma
+                </th>
+                <th
+                  class="p-2 w-16 bg-blue-50/50 text-blue-800 col-header cursor-pointer"
+                  onclick="toggleEditPrev('cho')"
+                >
+                  PREV
+                </th>
+                <th
+                  class="p-2 w-16 bg-emerald-50/50 text-emerald-800 col-header"
+                >
+                  PRES
+                </th>
+                <th class="p-2 w-16 bg-amber-50/50 text-amber-800 col-header">
+                  NA APM
+                </th>
+                <th class="p-2 w-16 bg-rose-50/50 text-rose-800 col-header">
+                  DA APM
+                </th>
+              </tr>
+            </thead>
+            <tbody id="body-cho"></tbody>
+            <tfoot
+              class="bg-slate-100/50 font-bold text-slate-700 border-t border-slate-200"
+            >
+              <tr>
+                <td class="p-2 text-left pl-4 text-xs uppercase">Total</td>
+                <td id="total-prev-cho">0</td>
+                <td id="total-pres-cho">0</td>
+                <td id="total-ffna-cho">0</td>
+                <td id="total-ffda-cho">0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-200 p-3 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] flex flex-col gap-2 z-50"
+    >
+      <div class="flex gap-2">
+        <button
+          onclick="copyReport()"
+          class="flex-1 bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-sm"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+            ></path>
+          </svg>
+          <span>COPIAR</span>
+        </button>
+        <button
+          id="saveAllButton"
+          class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-lg tracking-wide"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2.5"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          <span>SALVAR NO SERVER</span>
+        </button>
+      </div>
+      <div id="copy-feedback" class="text-center text-xs text-slate-500 h-4">
+        O relatório será copiado para a área de transferência.
+      </div>
+    </div>
+
+    <script>
+      // DADOS E LÓGICA (Sem Firebase, apenas Fetch Local)
+      let currentPhase = "pre";
+      const TURMAS = {
+        cfo2: [
+          { id: "cfo2_alfa", name: "Alfa", prev: 34 },
+          { id: "cfo2_bravo", name: "Bravo", prev: 33 },
+          { id: "cfo2_charlie", name: "Charlie", prev: 34 },
+          { id: "cfo2_delta", name: "Delta", prev: 34 },
+          { id: "cfo2_echo", name: "Echo", prev: 35 },
+          { id: "cfo2_foxtrot", name: "Foxtrot", prev: 35 },
+        ],
+        cfo1: [
+          { id: "cfo1_alfa", name: "Alfa", prev: 32 },
+          { id: "cfo1_bravo", name: "Bravo", prev: 29 },
+          { id: "cfo1_charlie", name: "Charlie", prev: 29 },
+          { id: "cfo1_delta", name: "Delta", prev: 31 },
+          { id: "cfo1_echo", name: "Echo", prev: 27 },
+          { id: "cfo1_foxtrot", name: "Foxtrot", prev: 31 },
+        ],
+        cho: [
+          { id: "cho_alfa", name: "Alfa", prev: 34 },
+          { id: "cho_bravo", name: "Bravo", prev: 34 },
+        ],
+      };
+      const state = {};
+      const sectionVisibility = { cfo2: true, cfo1: true, cho: true };
+      const sectionEditMode = { cfo2: false, cfo1: false, cho: false };
+
+      const initializeState = () => {
+        Object.values(TURMAS)
+          .flat()
+          .forEach((t) => {
+            state[t.id] = {
+              prev: t.prev,
+              ffna: 0,
+              ffda: 0,
+              confirmed: false,
+              get pres() {
+                return Math.max(0, this.prev - this.ffna - this.ffda);
+              },
+            };
+          });
+      };
+
+      const renderRow = (turma, sectionKey) => {
+        const tr = document.createElement("tr");
+        tr.id = `row-${turma.id}`;
+        tr.className =
+          "border-b border-slate-100 transition-all row-neutral h-12";
+        const isEditable = sectionEditMode[sectionKey];
+        tr.innerHTML = `
+                <td class="text-left font-bold text-slate-700 pl-4 cursor-pointer select-none text-sm" onclick="toggleRowConfirm('${
+                  turma.id
+                }')">${turma.name}</td>
+                <td class="bg-blue-50/30 border-r border-white p-1"><input type="number" min="0" inputmode="numeric" id="input-prev-${
+                  turma.id
+                }" data-id="${turma.id}" data-field="prev" class="input-prev ${
+          isEditable ? "unlocked" : ""
+        }" value="${turma.prev}" ${isEditable ? "" : "readonly"}></td>
+                <td class="bg-green-50/30 border-r border-white"><div id="disp-pres-${
+                  turma.id
+                }" class="font-black text-lg text-green-700">${
+          turma.prev
+        }</div></td>
+                <td class="bg-amber-50/30 border-r border-white p-1"><input type="number" min="0" inputmode="numeric" id="input-ffna-${
+                  turma.id
+                }" data-id="${
+          turma.id
+        }" data-field="ffna" class="input-cell text-amber-700 focus:bg-amber-100" placeholder="-"></td>
+                <td class="bg-rose-50/30 p-1"><input type="number" min="0" inputmode="numeric" id="input-ffda-${
+                  turma.id
+                }" data-id="${
+          turma.id
+        }" data-field="ffda" class="input-cell text-rose-600 focus:bg-rose-100" placeholder="-"></td>
+            `;
+        return tr;
+      };
+
+      const renderTables = () => {
+        ["cfo2", "cfo1", "cho"].forEach((k) => {
+          const tbody = document.getElementById(`body-${k}`);
+          tbody.innerHTML = "";
+          TURMAS[k].forEach((t) => tbody.appendChild(renderRow(t, k)));
+        });
+        document.querySelectorAll('input[type="number"]').forEach((i) => {
+          i.removeEventListener("input", handleInputChange);
+          i.addEventListener("input", handleInputChange);
+          i.addEventListener("focus", (e) => e.target.select());
+        });
+        updateTotalsUI();
+      };
+
+      window.toggleEditPrev = (k) => {
+        sectionEditMode[k] = !sectionEditMode[k];
+        TURMAS[k].forEach((t) => {
+          const el = document.getElementById(`input-prev-${t.id}`);
+          if (sectionEditMode[k]) {
+            el.readOnly = false;
+            el.classList.add("unlocked");
+          } else {
+            el.readOnly = true;
+            el.classList.remove("unlocked");
+          }
+        });
+      };
+
+      window.handleInputChange = (e) => {
+        const id = e.target.dataset.id,
+          field = e.target.dataset.field;
+        let val = parseInt(e.target.value);
+        if (isNaN(val) || val < 0) val = 0;
+        if (field === "ffna" || field === "ffda") {
+          const s = state[id],
+            other = s[field === "ffna" ? "ffda" : "ffna"];
+          if (val + other > s.prev) {
+            val = s.prev - other;
+            e.target.value = val > 0 ? val : "";
+          }
+        }
+        state[id][field] = val;
+        document.getElementById(`disp-pres-${id}`).textContent = state[id].pres;
+        if (field !== "prev" && currentPhase === "anuncio")
+          state[id].confirmed = false;
+        updateRowVisuals(id);
+        updateTotalsUI();
+      };
+
+      window.toggleRowConfirm = (id) => {
+        state[id].confirmed = !state[id].confirmed;
+        updateRowVisuals(id);
+      };
+      window.confirmAllInSection = (k) => {
+        if (!sectionVisibility[k]) return;
+        TURMAS[k].forEach((t) => {
+          state[t.id].confirmed = true;
+          updateRowVisuals(t.id);
+        });
+      };
+      window.toggleSection = (k) => {
+        sectionVisibility[k] = !sectionVisibility[k];
+        const el = document.getElementById(`section-${k}`);
+        if (sectionVisibility[k]) el.classList.remove("section-disabled");
+        else el.classList.add("section-disabled");
+        updateTotalsUI();
+      };
+
+      const updateRowVisuals = (id) => {
+        const r = document.getElementById(`row-${id}`),
+          s = state[id];
+        r.classList.remove("row-confirmed", "row-alert", "row-neutral");
+        if (s.confirmed) r.classList.add("row-confirmed");
+        else if (currentPhase === "anuncio" && (s.ffna > 0 || s.ffda > 0))
+          r.classList.add("row-alert");
+        else r.classList.add("row-neutral");
+      };
+
+      window.setPhase = (p) => {
+        currentPhase = p;
+        document.getElementById("btn-pre").className =
+          p === "pre"
+            ? "text-[10px] font-bold px-2 py-1 rounded bg-blue-600 text-white"
+            : "text-[10px] font-bold px-2 py-1 rounded text-slate-400 hover:bg-slate-700";
+        document.getElementById("btn-anuncio").className =
+          p === "anuncio"
+            ? "text-[10px] font-bold px-2 py-1 rounded bg-red-600 text-white shadow-lg"
+            : "text-[10px] font-bold px-2 py-1 rounded text-slate-400 hover:bg-slate-700";
+        Object.keys(state).forEach((id) => updateRowVisuals(id));
+      };
+
+      const updateTotalsUI = () => {
+        let G = { prev: 0, pres: 0, ffna: 0, ffda: 0 };
+        ["cfo2", "cfo1", "cho"].forEach((g) => {
+          let S = { prev: 0, pres: 0, ffna: 0, ffda: 0 };
+          TURMAS[g].forEach((t) => {
+            const s = state[t.id];
+            S.prev += s.prev;
+            S.pres += s.pres;
+            S.ffna += s.ffna;
+            S.ffda += s.ffda;
+          });
+          document.getElementById(`total-prev-${g}`).textContent = S.prev;
+          document.getElementById(`total-pres-${g}`).textContent = S.pres;
+          document.getElementById(`total-ffna-${g}`).textContent = S.ffna;
+          document.getElementById(`total-ffda-${g}`).textContent = S.ffda;
+          document.getElementById(`header-partial-pres-${g}`).textContent =
+            S.pres;
+          document.getElementById(`header-partial-prev-${g}`).textContent =
+            S.prev;
+          if (sectionVisibility[g]) {
+            G.prev += S.prev;
+            G.pres += S.pres;
+            G.ffna += S.ffna;
+            G.ffda += S.ffda;
+          }
+        });
+        document.getElementById("header-total-prev").textContent = G.prev;
+        document.getElementById("header-total-pres").textContent = G.pres;
+        document.getElementById("header-total-ffna").textContent = G.ffna;
+        document.getElementById("header-total-ffda").textContent = G.ffda;
+      };
+
+      // --- COMUNICAÇÃO COM O SERVIDOR NODE.JS (API) ---
+      const saveAllData = async () => {
+        const btn = document.getElementById("saveAllButton");
+        const oldHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = "Salvando...";
+
+        const date = document.getElementById("currentDate").value;
+        const type = document.getElementById("rollCallType").value;
+
+        // Prepara o JSON para enviar
+        const dataToSave = [];
+        Object.values(TURMAS)
+          .flat()
+          .forEach((t) => {
+            const s = state[t.id];
+            dataToSave.push({
+              id: t.id,
+              name: t.name,
+              prev: s.prev,
+              ffna: s.ffna,
+              ffda: s.ffda,
+              confirmed: s.confirmed,
+              pres: s.pres,
+            });
+          });
+
+        try {
+          const response = await fetch("/api/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ date, type, data: dataToSave }),
+          });
+
+          if (response.ok) {
+            btn.classList.remove("bg-blue-600");
+            btn.classList.add("bg-emerald-600");
+            btn.innerHTML = "SALVO!";
+            document
+              .getElementById("save-indicator")
+              .classList.remove("hidden");
+            setTimeout(() => {
+              btn.disabled = false;
+              btn.classList.add("bg-blue-600");
+              btn.classList.remove("bg-emerald-600");
+              btn.innerHTML = oldHTML;
+            }, 2000);
+          } else {
+            throw new Error("Erro servidor");
+          }
+        } catch (e) {
+          console.error(e);
+          btn.disabled = false;
+          btn.innerHTML = oldHTML;
+          alert(
+            "Erro ao salvar no VPS. Verifique se o server.js está rodando."
+          );
+        }
+      };
+
+      const loadExistingData = async () => {
+        const date = document.getElementById("currentDate").value;
+        const type = document.getElementById("rollCallType").value;
+
+        // Reseta visualmente antes de carregar
+        initializeState();
+
+        try {
+          const response = await fetch(`/api/data?date=${date}&type=${type}`);
+          if (response.ok) {
+            const records = await response.json();
+            if (records && records.length > 0) {
+              records.forEach((rec) => {
+                if (state[rec.id]) {
+                  state[rec.id].prev = rec.prev;
+                  state[rec.id].ffna = rec.ffna;
+                  state[rec.id].ffda = rec.ffda;
+                  state[rec.id].confirmed = rec.confirmed;
+
+                  const elPrev = document.getElementById(
+                    `input-prev-${rec.id}`
+                  );
+                  const elFfna = document.getElementById(
+                    `input-ffna-${rec.id}`
+                  );
+                  const elFfda = document.getElementById(
+                    `input-ffda-${rec.id}`
+                  );
+                  const elPres = document.getElementById(`disp-pres-${rec.id}`);
+
+                  if (elPrev) elPrev.value = rec.prev;
+                  if (elFfna) elFfna.value = rec.ffna > 0 ? rec.ffna : "";
+                  if (elFfda) elFfda.value = rec.ffda > 0 ? rec.ffda : "";
+                  if (elPres) elPres.textContent = state[rec.id].pres;
+                  updateRowVisuals(rec.id);
+                }
+              });
+            } else {
+              // Se não tem dados, reseta campos
+              Object.values(TURMAS)
+                .flat()
+                .forEach((t) => {
+                  document.getElementById(`input-prev-${t.id}`).value = t.prev;
+                  document.getElementById(`input-ffna-${t.id}`).value = "";
+                  document.getElementById(`input-ffda-${t.id}`).value = "";
+                  document.getElementById(`disp-pres-${t.id}`).textContent =
+                    t.prev;
+                  updateRowVisuals(t.id);
+                });
+            }
+            updateTotalsUI();
+          }
+        } catch (e) {
+          console.error("Erro ao carregar dados do servidor:", e);
+        }
+      };
+
+      window.copyReport = () => {
+        let t = `*SITUAÇÃO DE EFETIVO - ${document
+          .getElementById("currentDate")
+          .value.split("-")
+          .reverse()
+          .join("/")}*\n_${document.getElementById("rollCallType").value}_\n\n`;
+        ["cfo2", "cfo1", "cho"].forEach((g) => {
+          if (!sectionVisibility[g]) return;
+          t += `*${g.toUpperCase()}*\n`;
+          let p = 0,
+            pr = 0,
+            na = 0,
+            da = 0;
+          TURMAS[g].forEach((tur) => {
+            const s = state[tur.id];
+            p += s.prev;
+            pr += s.pres;
+            na += s.ffna;
+            da += s.ffda;
+            if (s.ffna > 0 || s.ffda > 0)
+              t += `- ${tur.name}: ${s.pres}/${s.prev} (NA:${s.ffna} DA:${s.ffda})\n`;
+          });
+          t += `> Total: ${pr}/${p} (NA:${na} DA:${da})\n\n`;
+        });
+        t += `*TOTAL GERAL: ${
+          document.getElementById("header-total-pres").textContent
+        }/${document.getElementById("header-total-prev").textContent}*`;
+        navigator.clipboard.writeText(t).then(() => {
+          const f = document.getElementById("copy-feedback");
+          f.textContent = "Copiado!";
+          f.className = "text-center text-xs text-green-600 font-bold h-4";
+          setTimeout(() => {
+            f.textContent = "O relatório será copiado...";
+            f.className = "text-center text-xs text-slate-500 h-4";
+          }, 2000);
+        });
+      };
+
+      window.onload = () => {
+        document.getElementById("currentDate").value = new Date()
+          .toISOString()
+          .split("T")[0];
+        initializeState();
+        renderTables();
+
+        // Carrega dados iniciais do servidor
+        loadExistingData();
+
+        document
+          .getElementById("saveAllButton")
+          .addEventListener("click", saveAllData);
+        document
+          .getElementById("currentDate")
+          .addEventListener("change", loadExistingData);
+        document
+          .getElementById("rollCallType")
+          .addEventListener("change", loadExistingData);
+      };
+    </script>
+  </body>
+</html>
