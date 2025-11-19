@@ -3,7 +3,10 @@ const fs = require("fs");
 const path = require("path");
 const url = require("url");
 
-const PORT = 8081; // Porta do servidor
+// --- ALTERAÇÃO AQUI ---
+// Tenta pegar a porta do ambiente (Contabo/PM2), senão usa 3001
+const PORT = process.env.PORT || 3001;
+
 const DATA_FILE = path.join(__dirname, "database.json"); // Arquivo onde os dados serão salvos
 
 // Garante que o arquivo de dados existe
@@ -22,7 +25,7 @@ const mimeTypes = {
 };
 
 const server = http.createServer((req, res) => {
-  // Adiciona cabeçalhos CORS para evitar problemas se acessar de IPs diferentes
+  // Adiciona cabeçalhos CORS para evitar problemas
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -61,7 +64,6 @@ const server = http.createServer((req, res) => {
 
       try {
         const db = JSON.parse(data);
-        // Cria uma chave única para buscar os dados específicos daquela data e tipo de chamada
         const key = `${date}_${type}`;
         const records = db[key] || [];
 
@@ -85,15 +87,11 @@ const server = http.createServer((req, res) => {
         const { date, type, data } = payload;
         const key = `${date}_${type}`;
 
-        // Lê o arquivo atual
         const currentData = fs.existsSync(DATA_FILE)
           ? JSON.parse(fs.readFileSync(DATA_FILE, "utf8"))
           : {};
-
-        // Atualiza apenas a chave correspondente à data/tipo atual
         currentData[key] = data;
 
-        // Escreve de volta no disco
         fs.writeFileSync(
           DATA_FILE,
           JSON.stringify(currentData, null, 2),
@@ -119,7 +117,7 @@ const server = http.createServer((req, res) => {
       }
     });
   }
-  // --- Servir Arquivos Estáticos (se houver) ou 404 ---
+  // --- Servir Arquivos Estáticos ---
   else {
     res.writeHead(404);
     res.end("Não encontrado");
@@ -127,8 +125,6 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
-  console.log(
-    `Para acessar no celular, use o IP do VPS: http://SEU_IP_VPS:${PORT}`
-  );
+  console.log(`Servidor rodando na porta: ${PORT}`);
+  console.log(`Acesse: http://SEU_IP_VPS:${PORT}`);
 });
