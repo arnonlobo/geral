@@ -117,7 +117,7 @@ const server = http.createServer((req, res) => {
       }
     });
   }
-  // --- Servir Arquivos Estáticos ---
+  // --- Servir Arquivos Estático ---
   else {
     res.writeHead(404);
     res.end("Não encontrado");
