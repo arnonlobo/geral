@@ -16,6 +16,7 @@
         padding-bottom: 160px;
         -webkit-tap-highlight-color: transparent;
       }
+
       input[type="number"]::-webkit-outer-spin-button,
       input[type="number"]::-webkit-inner-spin-button {
         -webkit-appearance: none;
@@ -73,6 +74,28 @@
       .row-neutral {
         background-color: white;
         border-left: 4px solid transparent;
+      }
+
+      .row-disabled {
+        background-color: #f1f5f9 !important;
+        color: #94a3b8;
+        border-left: 4px solid #cbd5e1;
+      }
+      .row-disabled input:not(.turma-check) {
+        pointer-events: none;
+        color: #cbd5e1 !important;
+      }
+
+      .turma-check {
+        display: none;
+        width: 20px;
+        height: 20px;
+        accent-color: #2563eb;
+        cursor: pointer;
+        margin-right: 8px;
+      }
+      body.editing-mode .turma-check {
+        display: inline-block;
       }
 
       .section-disabled .card-content {
@@ -174,55 +197,55 @@
               <span
                 id="save-indicator"
                 class="hidden text-emerald-400 flex items-center gap-1 font-bold"
-                >SALVO NO SERVER</span
+                >SALVO</span
               >
             </div>
           </div>
-          <div class="flex items-center bg-slate-800 rounded-lg p-1 gap-1">
+          <div class="flex items-center gap-2">
             <button
-              id="btn-pre"
-              onclick="setPhase('pre')"
-              class="text-[10px] font-bold px-2 py-1 rounded bg-blue-600 text-white"
+              onclick="toggleEditMode()"
+              id="btn-edit-mode"
+              class="bg-slate-700 p-2 rounded-full text-slate-300 hover:text-white hover:bg-slate-600 transition-colors"
+              title="Gerenciar Turmas"
             >
-              PRÉ-ANÚNCIO
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
+              </svg>
             </button>
-            <button
-              id="btn-anuncio"
-              onclick="setPhase('anuncio')"
-              class="text-[10px] font-bold px-2 py-1 rounded text-slate-400 hover:bg-slate-700"
-            >
-              ANÚNCIO
-            </button>
+
+            <div class="flex bg-slate-800 rounded-lg p-1 gap-1">
+              <button
+                id="btn-pre"
+                onclick="setPhase('pre')"
+                class="text-[10px] font-bold px-2 py-1 rounded bg-blue-600 text-white"
+              >
+                PRÉ
+              </button>
+              <button
+                id="btn-anuncio"
+                onclick="setPhase('anuncio')"
+                class="text-[10px] font-bold px-2 py-1 rounded text-slate-400 hover:bg-slate-700"
+              >
+                ANÚNCIO
+              </button>
+            </div>
           </div>
         </div>
 
+        <!-- Placar (ORDEM ALTERADA) -->
         <div class="grid grid-cols-3 gap-2 mb-3">
-          <div
-            class="bg-amber-900/30 border border-amber-700/50 rounded p-1.5 text-center flex flex-col justify-center"
-          >
-            <span
-              class="text-[9px] text-amber-200/80 font-bold uppercase tracking-tighter"
-              >FF NA APM</span
-            >
-            <span
-              class="text-xl font-black text-amber-400 leading-none"
-              id="header-total-ffna"
-              >0</span
-            >
-          </div>
-          <div
-            class="bg-rose-900/30 border border-rose-700/50 rounded p-1.5 text-center flex flex-col justify-center"
-          >
-            <span
-              class="text-[9px] text-rose-200/80 font-bold uppercase tracking-tighter"
-              >FF DA APM</span
-            >
-            <span
-              class="text-xl font-black text-rose-400 leading-none"
-              id="header-total-ffda"
-              >0</span
-            >
-          </div>
+          <!-- 1. Presentes (Agora o primeiro) -->
           <div
             class="bg-emerald-900/30 border border-emerald-700/50 rounded p-1.5 text-center flex flex-col justify-center relative overflow-hidden"
           >
@@ -239,6 +262,36 @@
                 >/ <span id="header-total-prev">0</span></span
               >
             </div>
+          </div>
+
+          <!-- 2. FF NA APM (Meio) -->
+          <div
+            class="bg-amber-900/30 border border-amber-700/50 rounded p-1.5 text-center flex flex-col justify-center"
+          >
+            <span
+              class="text-[9px] text-amber-200/80 font-bold uppercase tracking-tighter"
+              >FF NA APM</span
+            >
+            <span
+              class="text-xl font-black text-amber-400 leading-none"
+              id="header-total-ffna"
+              >0</span
+            >
+          </div>
+
+          <!-- 3. FF DA APM (Último) -->
+          <div
+            class="bg-rose-900/30 border border-rose-700/50 rounded p-1.5 text-center flex flex-col justify-center"
+          >
+            <span
+              class="text-[9px] text-rose-200/80 font-bold uppercase tracking-tighter"
+              >FF DA APM</span
+            >
+            <span
+              class="text-xl font-black text-rose-400 leading-none"
+              id="header-total-ffda"
+              >0</span
+            >
           </div>
         </div>
 
@@ -263,6 +316,7 @@
     </header>
 
     <div class="max-w-3xl mx-auto p-3 space-y-4 mt-2">
+      <!-- CFO 2 -->
       <div
         class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all-300"
         id="section-cfo2"
@@ -332,6 +386,7 @@
         </div>
       </div>
 
+      <!-- CFO 1 -->
       <div
         class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all-300"
         id="section-cfo1"
@@ -356,7 +411,9 @@
             ><input
               type="checkbox"
               checked
-              onchange="toggleSection('cfo1')" /><span class="slider"></span
+              onchange="toggleSection('cfo1')" /><span
+              class="slider !bg-slate-300 peer-checked:!bg-yellow-500"
+            ></span
           ></label>
         </div>
         <div class="card-content overflow-x-auto">
@@ -401,6 +458,7 @@
         </div>
       </div>
 
+      <!-- CHO -->
       <div
         class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all-300"
         id="section-cho"
@@ -425,7 +483,9 @@
             ><input
               type="checkbox"
               checked
-              onchange="toggleSection('cho')" /><span class="slider"></span
+              onchange="toggleSection('cho')" /><span
+              class="slider !bg-slate-300 peer-checked:!bg-slate-600"
+            ></span
           ></label>
         </div>
         <div class="card-content overflow-x-auto">
@@ -472,55 +532,74 @@
     </div>
 
     <div
-      class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-200 p-3 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] flex flex-col gap-2 z-50"
+      class="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-200 p-3 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] flex gap-2 z-50"
     >
-      <div class="flex gap-2">
-        <button
-          onclick="copyReport()"
-          class="flex-1 bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-sm"
+      <button
+        onclick="resetAll()"
+        class="bg-red-500 hover:bg-red-600 text-white font-bold p-3 rounded-xl shadow-lg flex items-center justify-center transition-all active:scale-95 aspect-square"
+        title="Limpar Tudo"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
-            ></path>
-          </svg>
-          <span>COPIAR</span>
-        </button>
-        <button
-          id="saveAllButton"
-          class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-lg tracking-wide"
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          ></path>
+        </svg>
+      </button>
+
+      <button
+        onclick="copyReport()"
+        class="flex-1 bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-sm"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
         >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2.5"
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-          <span>SALVAR NO SERVER</span>
-        </button>
-      </div>
-      <div id="copy-feedback" class="text-center text-xs text-slate-500 h-4">
-        O relatório será copiado para a área de transferência.
-      </div>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+          ></path>
+        </svg>
+        <span>COPIAR</span>
+      </button>
+
+      <button
+        id="saveAllButton"
+        class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-lg tracking-wide"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2.5"
+            d="M5 13l4 4L19 7"
+          />
+        </svg>
+        <span>SALVAR</span>
+      </button>
     </div>
+    <div
+      id="copy-feedback"
+      class="fixed bottom-1 left-0 w-full text-center text-[10px] text-slate-400 pb-1 z-50 pointer-events-none"
+    ></div>
 
     <script>
-      // DADOS E LÓGICA (Sem Firebase, apenas Fetch Local)
       let currentPhase = "pre";
       const TURMAS = {
         cfo2: [
@@ -557,6 +636,7 @@
               ffna: 0,
               ffda: 0,
               confirmed: false,
+              active: true,
               get pres() {
                 return Math.max(0, this.prev - this.ffna - this.ffda);
               },
@@ -570,10 +650,16 @@
         tr.className =
           "border-b border-slate-100 transition-all row-neutral h-12";
         const isEditable = sectionEditMode[sectionKey];
+
         tr.innerHTML = `
-                <td class="text-left font-bold text-slate-700 pl-4 cursor-pointer select-none text-sm" onclick="toggleRowConfirm('${
-                  turma.id
-                }')">${turma.name}</td>
+                <td class="text-left font-bold text-slate-700 pl-2 select-none text-sm flex items-center h-12 gap-2">
+                    <input type="checkbox" class="turma-check" checked onchange="toggleClass('${
+                      turma.id
+                    }')" title="Ativar/Desativar Turma">
+                    <span onclick="toggleRowConfirm('${
+                      turma.id
+                    }')" class="cursor-pointer flex-1">${turma.name}</span>
+                </td>
                 <td class="bg-blue-50/30 border-r border-white p-1"><input type="number" min="0" inputmode="numeric" id="input-prev-${
                   turma.id
                 }" data-id="${turma.id}" data-field="prev" class="input-prev ${
@@ -612,6 +698,69 @@
         updateTotalsUI();
       };
 
+      // Toggle do "Modo Edição" (Lápis)
+      window.toggleEditMode = () => {
+        document.body.classList.toggle("editing-mode");
+        const btn = document.getElementById("btn-edit-mode");
+        if (document.body.classList.contains("editing-mode")) {
+          btn.classList.remove("bg-slate-700", "text-slate-300");
+          btn.classList.add(
+            "bg-blue-600",
+            "text-white",
+            "ring-2",
+            "ring-blue-300"
+          );
+        } else {
+          btn.classList.add("bg-slate-700", "text-slate-300");
+          btn.classList.remove(
+            "bg-blue-600",
+            "text-white",
+            "ring-2",
+            "ring-blue-300"
+          );
+        }
+      };
+
+      window.toggleClass = (id) => {
+        const checkbox = document.querySelector(`#row-${id} .turma-check`);
+        state[id].active = checkbox.checked;
+
+        const row = document.getElementById(`row-${id}`);
+        if (state[id].active) {
+          row.classList.remove("row-disabled");
+        } else {
+          row.classList.add("row-disabled");
+        }
+        updateTotalsUI();
+      };
+
+      window.resetAll = () => {
+        if (
+          confirm("Tem certeza que deseja LIMPAR todos os dados preenchidos?")
+        ) {
+          initializeState();
+          Object.values(TURMAS)
+            .flat()
+            .forEach((t) => {
+              const id = t.id;
+              document.getElementById(`input-prev-${id}`).value = t.prev;
+              document.getElementById(`input-ffna-${id}`).value = "";
+              document.getElementById(`input-ffda-${id}`).value = "";
+              document.getElementById(`disp-pres-${id}`).textContent = t.prev;
+              const check = document.querySelector(`#row-${id} .turma-check`);
+              if (check) check.checked = true;
+              const row = document.getElementById(`row-${id}`);
+              row.classList.remove(
+                "row-confirmed",
+                "row-alert",
+                "row-disabled"
+              );
+              row.classList.add("row-neutral");
+            });
+          updateTotalsUI();
+        }
+      };
+
       window.toggleEditPrev = (k) => {
         sectionEditMode[k] = !sectionEditMode[k];
         TURMAS[k].forEach((t) => {
@@ -648,16 +797,21 @@
       };
 
       window.toggleRowConfirm = (id) => {
+        if (!state[id].active) return;
         state[id].confirmed = !state[id].confirmed;
         updateRowVisuals(id);
       };
+
       window.confirmAllInSection = (k) => {
         if (!sectionVisibility[k]) return;
         TURMAS[k].forEach((t) => {
-          state[t.id].confirmed = true;
-          updateRowVisuals(t.id);
+          if (state[t.id].active) {
+            state[t.id].confirmed = true;
+            updateRowVisuals(t.id);
+          }
         });
       };
+
       window.toggleSection = (k) => {
         sectionVisibility[k] = !sectionVisibility[k];
         const el = document.getElementById(`section-${k}`);
@@ -669,6 +823,7 @@
       const updateRowVisuals = (id) => {
         const r = document.getElementById(`row-${id}`),
           s = state[id];
+        if (!s.active) return;
         r.classList.remove("row-confirmed", "row-alert", "row-neutral");
         if (s.confirmed) r.classList.add("row-confirmed");
         else if (currentPhase === "anuncio" && (s.ffna > 0 || s.ffda > 0))
@@ -695,10 +850,12 @@
           let S = { prev: 0, pres: 0, ffna: 0, ffda: 0 };
           TURMAS[g].forEach((t) => {
             const s = state[t.id];
-            S.prev += s.prev;
-            S.pres += s.pres;
-            S.ffna += s.ffna;
-            S.ffda += s.ffda;
+            if (state[t.id].active) {
+              S.prev += s.prev;
+              S.pres += s.pres;
+              S.ffna += s.ffna;
+              S.ffda += s.ffda;
+            }
           });
           document.getElementById(`total-prev-${g}`).textContent = S.prev;
           document.getElementById(`total-pres-${g}`).textContent = S.pres;
@@ -708,6 +865,7 @@
             S.pres;
           document.getElementById(`header-partial-prev-${g}`).textContent =
             S.prev;
+
           if (sectionVisibility[g]) {
             G.prev += S.prev;
             G.pres += S.pres;
@@ -721,7 +879,6 @@
         document.getElementById("header-total-ffda").textContent = G.ffda;
       };
 
-      // --- COMUNICAÇÃO COM O SERVIDOR NODE.JS (API) ---
       const saveAllData = async () => {
         const btn = document.getElementById("saveAllButton");
         const oldHTML = btn.innerHTML;
@@ -731,7 +888,6 @@
         const date = document.getElementById("currentDate").value;
         const type = document.getElementById("rollCallType").value;
 
-        // Prepara o JSON para enviar
         const dataToSave = [];
         Object.values(TURMAS)
           .flat()
@@ -744,6 +900,7 @@
               ffna: s.ffna,
               ffda: s.ffda,
               confirmed: s.confirmed,
+              active: s.active,
               pres: s.pres,
             });
           });
@@ -754,14 +911,10 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ date, type, data: dataToSave }),
           });
-
           if (response.ok) {
             btn.classList.remove("bg-blue-600");
             btn.classList.add("bg-emerald-600");
             btn.innerHTML = "SALVO!";
-            document
-              .getElementById("save-indicator")
-              .classList.remove("hidden");
             setTimeout(() => {
               btn.disabled = false;
               btn.classList.add("bg-blue-600");
@@ -775,19 +928,14 @@
           console.error(e);
           btn.disabled = false;
           btn.innerHTML = oldHTML;
-          alert(
-            "Erro ao salvar no VPS. Verifique se o server.js está rodando."
-          );
+          alert("Erro ao salvar no VPS.");
         }
       };
 
       const loadExistingData = async () => {
         const date = document.getElementById("currentDate").value;
         const type = document.getElementById("rollCallType").value;
-
-        // Reseta visualmente antes de carregar
         initializeState();
-
         try {
           const response = await fetch(`/api/data?date=${date}&type=${type}`);
           if (response.ok) {
@@ -799,6 +947,8 @@
                   state[rec.id].ffna = rec.ffna;
                   state[rec.id].ffda = rec.ffda;
                   state[rec.id].confirmed = rec.confirmed;
+                  state[rec.id].active =
+                    rec.active !== undefined ? rec.active : true;
 
                   const elPrev = document.getElementById(
                     `input-prev-${rec.id}`
@@ -810,16 +960,22 @@
                     `input-ffda-${rec.id}`
                   );
                   const elPres = document.getElementById(`disp-pres-${rec.id}`);
+                  const elCheck = document.querySelector(
+                    `#row-${rec.id} .turma-check`
+                  );
+                  const row = document.getElementById(`row-${rec.id}`);
 
                   if (elPrev) elPrev.value = rec.prev;
                   if (elFfna) elFfna.value = rec.ffna > 0 ? rec.ffna : "";
                   if (elFfda) elFfda.value = rec.ffda > 0 ? rec.ffda : "";
                   if (elPres) elPres.textContent = state[rec.id].pres;
-                  updateRowVisuals(rec.id);
+                  if (elCheck) elCheck.checked = state[rec.id].active;
+
+                  if (!state[rec.id].active) row.classList.add("row-disabled");
+                  else updateRowVisuals(rec.id);
                 }
               });
             } else {
-              // Se não tem dados, reseta campos
               Object.values(TURMAS)
                 .flat()
                 .forEach((t) => {
@@ -828,50 +984,72 @@
                   document.getElementById(`input-ffda-${t.id}`).value = "";
                   document.getElementById(`disp-pres-${t.id}`).textContent =
                     t.prev;
+                  const check = document.querySelector(
+                    `#row-${t.id} .turma-check`
+                  );
+                  if (check) check.checked = true;
+                  document
+                    .getElementById(`row-${t.id}`)
+                    .classList.remove("row-disabled");
                   updateRowVisuals(t.id);
                 });
             }
             updateTotalsUI();
           }
         } catch (e) {
-          console.error("Erro ao carregar dados do servidor:", e);
+          console.error("Erro ao carregar dados:", e);
         }
       };
 
       window.copyReport = () => {
-        let t = `*SITUAÇÃO DE EFETIVO - ${document
+        const date = document
           .getElementById("currentDate")
           .value.split("-")
           .reverse()
-          .join("/")}*\n_${document.getElementById("rollCallType").value}_\n\n`;
-        ["cfo2", "cfo1", "cho"].forEach((g) => {
-          if (!sectionVisibility[g]) return;
-          t += `*${g.toUpperCase()}*\n`;
-          let p = 0,
-            pr = 0,
-            na = 0,
-            da = 0;
-          TURMAS[g].forEach((tur) => {
-            const s = state[tur.id];
-            p += s.prev;
-            pr += s.pres;
-            na += s.ffna;
-            da += s.ffda;
-            if (s.ffna > 0 || s.ffda > 0)
-              t += `- ${tur.name}: ${s.pres}/${s.prev} (NA:${s.ffna} DA:${s.ffda})\n`;
+          .join("/");
+        const type = document.getElementById("rollCallType").value;
+        let text = `*SITUAÇÃO DE EFETIVO - ${date}*\n_${type}_\n\n`;
+
+        ["cfo2", "cfo1", "cho"].forEach((group) => {
+          if (!sectionVisibility[group]) return;
+
+          let subPrev = 0,
+            subPres = 0,
+            subFfna = 0,
+            subFfda = 0;
+          TURMAS[group].forEach((t) => {
+            const s = state[t.id];
+            if (s.active) {
+              subPrev += s.prev;
+              subPres += s.pres;
+              subFfna += s.ffna;
+              subFfda += s.ffda;
+            }
           });
-          t += `> Total: ${pr}/${p} (NA:${na} DA:${da})\n\n`;
+
+          // Format requested
+          text += `➖➖ *${group.toUpperCase()}* ➖➖\n`;
+          text += `◼Previstos: *${subPrev}*\n`;
+          text += `◼Presentes: *${subPres}*\n`;
+          text += `◼Fora de forma (na APM): *${subFfna}*\n`;
+          text += `◼Fora de forma (da APM): *${subFfda}*\n\n`;
         });
-        t += `*TOTAL GERAL: ${
-          document.getElementById("header-total-pres").textContent
-        }/${document.getElementById("header-total-prev").textContent}*`;
-        navigator.clipboard.writeText(t).then(() => {
+
+        // Total Geral
+        const totPres =
+          document.getElementById("header-total-pres").textContent;
+        const totPrev =
+          document.getElementById("header-total-prev").textContent;
+
+        navigator.clipboard.writeText(text).then(() => {
           const f = document.getElementById("copy-feedback");
           f.textContent = "Copiado!";
           f.className = "text-center text-xs text-green-600 font-bold h-4";
           setTimeout(() => {
-            f.textContent = "O relatório será copiado...";
-            f.className = "text-center text-xs text-slate-500 h-4";
+            f.textContent =
+              "O relatório será copiado para a área de transferência.";
+            f.className =
+              "text-center text-xs text-slate-400 pb-1 z-50 pointer-events-none";
           }, 2000);
         });
       };
@@ -882,10 +1060,7 @@
           .split("T")[0];
         initializeState();
         renderTables();
-
-        // Carrega dados inicii do servi
         loadExistingData();
-
         document
           .getElementById("saveAllButton")
           .addEventListener("click", saveAllData);
